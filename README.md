@@ -24,6 +24,9 @@ Compose), покрыт тестами и снабжён автогенериру
 - Python 3.12
 - Django 6
 - Django REST Framework
+- Gunicorn
+- Whitenoise(поддержка статики)
+- Drf-spectacular(автогенерация документации)
 - SimpleJWT
 - zxcvbn(проверка сложности пароля) 
 - менеджер пакетов uv
