@@ -1,0 +1,53 @@
+services:
+  wb_postgres_db:
+    image: postgres:16.1-alpine
+    restart: 'unless-stopped'
+    container_name: wb_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    restart: 'unless-stopped'
+    container_name: wb_web
+    env_file: .env
+    environment:
+      # В контейнере работаем на Postgres, а не на SQLite
+      DJANGO_DEBUG: 'False'
+      DB_HOST: wb_postgres_db
+    command: >
+      sh -c "uv run python manage.py collectstatic --noinput &&
+             uv run python manage.py migrate &&
+             uv run gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      wb_postgres_db:
+        condition: service_healthy
+
+  adminer:
+    image: 'adminer'
+    restart: 'unless-stopped'
+    container_name: 'wb_adminer'
+    ports:
+      - '8080:8080'
+    environment:
+      # Эти переменные заставляют Adminer автоматически подставлять данные
+      ADMINER_DEFAULT_SERVER: 'wb_postgres_db'
+      ADMINER_DESIGN: 'pepa-linha-dark'
+    depends_on:
+      - 'wb_postgres_db'
+
+volumes:
+  pg_data:

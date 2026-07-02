@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+/.mypy_cache
+/.pytest_cache
+# Virtual environments
+.venv
+
+# User custom ignores
+.ruff_cache
+*.sqlite3
+/staticfiles
+gg.py
+*.ipynb
+
